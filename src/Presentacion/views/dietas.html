@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Training - Gestión de Dietas</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --white: #ffffff;
+            --danger: #d63031;
+            --success: #00b894;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: var(--dark);
+        }
+
+        .navbar {
+            background-color: var(--dark);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            background-color: var(--primary);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            flex: 1 1 300px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .btn:hover { background: #5b4bc4; transform: translateY(-2px); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--light);
+        }
+
+        th { background-color: var(--light); color: var(--dark); }
+
+        tr:hover { background-color: #f1f2f6; }
+
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: {{DISPLAY_MENSAJE}};
+        }
+
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @media (min-width: 768px) {
+            .table-container { flex: 2 1 600px; }
+            .form-container { flex: 1 1 350px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/clientes">Clientes</a>
+        <a href="/dietas" class="active">Dietas</a>
+        <a href="/ejercicios">Ejercicios</a>
+        <a href="/rutinas">Rutinas</a>
+        <a href="/asignaciones">Asignaciones</a>
+    </nav>
+
+    <header>
+        <h1>Personal Training</h1>
+        <p>Gestión de Dietas</p>
+    </header>
+
+    <div class="container">
+        <div class="card form-container">
+            <h2>Registrar Dieta</h2>
+            <div class="message {{TIPO_MENSAJE}}">{{MENSAJE}}</div>
+            <form action="/dietas" method="POST">
+                <input type="hidden" name="action" value="crear">
+                
+                <div class="form-group">
+                    <label for="titulo">Título de la Dieta</label>
+                    <input type="text" id="titulo" name="titulo" required placeholder="Ej: Dieta Balanceada">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="5" required placeholder="Ej: Dieta basada en carbohidratos y proteínas..."></textarea>
+                </div>
+
+                <button type="submit" class="btn">GUARDAR DIETA</button>
+            </form>
+        </div>
+
+        <div class="card table-container">
+            <h2>Lista de Dietas</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="30%">Título</th>
+                            <th width="70%">Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{DIETAS_TABLE_BODY}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
