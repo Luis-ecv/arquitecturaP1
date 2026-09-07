@@ -145,6 +145,17 @@
             background-color: #f1f2f6;
         }
 
+        /* Estilos Kebab Menu */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 0 10px; font-weight: bold; color: var(--dark); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: var(--white); min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 10; border-radius: 6px; overflow: hidden; border: 1px solid var(--light); }
+        .dropdown-content button { color: var(--dark); padding: 12px 16px; text-decoration: none; display: block; background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .dropdown-content button:hover { background-color: var(--light); }
+        .dropdown-content form { margin: 0; }
+        .dropdown-content .danger-text { color: var(--danger); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .action-cell { width: 50px; text-align: center; }
+
         .badge {
             background: var(--primary);
             color: white;
@@ -194,7 +205,8 @@
             <h2>Asignar Rutina</h2>
             <div class="message {{TIPO_MENSAJE}}">{{MENSAJE}}</div>
             <form action="/rutinas" method="POST">
-                <input type="hidden" name="action" value="crear">
+                <input type="hidden" name="action" id="form_action" value="crear">
+                <input type="hidden" name="rutina_id" id="rutina_id" value="">
                 
                 <div class="form-group">
                     <label for="cliente_id">Seleccionar Cliente</label>
@@ -229,7 +241,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn">GUARDAR RUTINA</button>
+                <button type="submit" id="btn_submit" class="btn">CREAR RUTINA</button>
             </form>
         </div>
 
@@ -240,9 +252,10 @@
                     <thead>
                         <tr>
                             <th>Cliente</th>
-                            <th>Rutina</th>
+                            <th>Nombre de Rutina</th>
                             <th>Tipo</th>
-                            <th>Dieta Asignada</th>
+                            <th>Dieta Base</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -252,5 +265,19 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        function editarRutina(id, nombre, tipo, clienteId, dietaId) {
+            document.getElementById('form_action').value = 'editar';
+            document.getElementById('rutina_id').value = id;
+            document.getElementById('nombre').value = nombre;
+            document.getElementById('tipo').value = tipo;
+            document.getElementById('cliente_id').value = clienteId;
+            document.getElementById('dieta_id').value = dietaId;
+            
+            document.getElementById('btn_submit').innerText = 'ACTUALIZAR RUTINA';
+            window.scrollTo(0, 0);
+        }
+    </script>
 </body>
 </html>

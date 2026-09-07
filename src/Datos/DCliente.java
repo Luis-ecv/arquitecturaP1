@@ -60,4 +60,38 @@ public class DCliente {
         }
         return lista;
     }
+
+    public boolean editar(int id, double altura, String correo, String nombre, double peso, String sexo, String telefono) {
+        String sql = "UPDATE cliente SET altura = ?, correo = ?, nombre = ?, peso = ?, sexo = ?, telefono = ? WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, altura);
+            pstmt.setString(2, correo);
+            pstmt.setString(3, nombre);
+            pstmt.setDouble(4, peso);
+            pstmt.setString(5, sexo);
+            pstmt.setString(6, telefono);
+            pstmt.setInt(7, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al editar cliente: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM cliente WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al eliminar cliente: " + e.getMessage());
+            return false;
+        }
+    }
 }

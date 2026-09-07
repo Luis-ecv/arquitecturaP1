@@ -48,4 +48,34 @@ public class DDieta {
         }
         return lista;
     }
+
+    public boolean editar(int id, String titulo, String descripcion) {
+        String sql = "UPDATE dieta SET titulo = ?, descripcion = ? WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, titulo);
+            pstmt.setString(2, descripcion);
+            pstmt.setInt(3, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al editar dieta: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM dieta WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al eliminar dieta: " + e.getMessage());
+            return false;
+        }
+    }
 }

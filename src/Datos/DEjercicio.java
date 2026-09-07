@@ -52,4 +52,36 @@ public class DEjercicio {
         }
         return lista;
     }
+
+    public boolean editar(int id, String nombre, String duracion, String repeticion, String imagen_url) {
+        String sql = "UPDATE ejercicio SET nombre = ?, duracion = ?, repeticion = ?, imagen_url = ? WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, duracion);
+            pstmt.setString(3, repeticion);
+            pstmt.setString(4, imagen_url);
+            pstmt.setInt(5, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al editar ejercicio: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM ejercicio WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al eliminar ejercicio: " + e.getMessage());
+            return false;
+        }
+    }
 }

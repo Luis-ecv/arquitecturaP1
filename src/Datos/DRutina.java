@@ -58,4 +58,36 @@ public class DRutina {
         }
         return lista;
     }
+
+    public boolean editar(int id, String nombre, String tipo, int cliente_id, int dieta_id) {
+        String sql = "UPDATE rutina SET nombre = ?, tipo = ?, cliente_id = ?, dieta_id = ? WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, tipo);
+            pstmt.setInt(3, cliente_id);
+            pstmt.setInt(4, dieta_id);
+            pstmt.setInt(5, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al editar rutina: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM rutina WHERE id = ?";
+        Conexion con = new Conexion();
+        try (Connection conn = con.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al eliminar rutina: " + e.getMessage());
+            return false;
+        }
+    }
 }

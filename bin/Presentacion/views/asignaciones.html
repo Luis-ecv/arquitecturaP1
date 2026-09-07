@@ -146,6 +146,17 @@
             background-color: #f1f2f6;
         }
 
+        /* Estilos Kebab Menu */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 0 10px; font-weight: bold; color: var(--dark); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: var(--white); min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 10; border-radius: 6px; overflow: hidden; border: 1px solid var(--light); }
+        .dropdown-content button { color: var(--dark); padding: 12px 16px; text-decoration: none; display: block; background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .dropdown-content button:hover { background-color: var(--light); }
+        .dropdown-content form { margin: 0; }
+        .dropdown-content .danger-text { color: var(--danger); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .action-cell { width: 50px; text-align: center; }
+
         .img-preview {
             width: 50px;
             height: 50px;

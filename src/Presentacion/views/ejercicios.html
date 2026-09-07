@@ -144,6 +144,17 @@
             border: 1px solid #ddd;
         }
 
+        /* Estilos Kebab Menu */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 0 10px; font-weight: bold; color: var(--dark); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: var(--white); min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 10; border-radius: 6px; overflow: hidden; border: 1px solid var(--light); }
+        .dropdown-content button { color: var(--dark); padding: 12px 16px; text-decoration: none; display: block; background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .dropdown-content button:hover { background-color: var(--light); }
+        .dropdown-content form { margin: 0; }
+        .dropdown-content .danger-text { color: var(--danger); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .action-cell { width: 50px; text-align: center; }
+
         .message {
             padding: 15px;
             border-radius: 6px;
@@ -201,7 +212,8 @@
             <h2>Registrar Ejercicio</h2>
             <div class="message {{TIPO_MENSAJE}}">{{MENSAJE}}</div>
             <form action="/ejercicios" method="POST">
-                <input type="hidden" name="action" value="crear">
+                <input type="hidden" name="action" id="form_action" value="crear">
+                <input type="hidden" name="ejercicio_id" id="ejercicio_id" value="">
                 
                 <div class="form-group">
                     <label for="nombre">Nombre del Ejercicio</label>
@@ -220,8 +232,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="foto_upload">Subir Imagen/GIF del Ejercicio (Opcional)</label>
-                    <input type="file" id="foto_upload" accept="image/*">
+                    <label for="foto_upload">Subir Imagen del Ejercicio (Opcional, solo JPG/PNG)</label>
+                    <input type="file" id="foto_upload" accept="image/png, image/jpeg, image/jpg">
                     <input type="hidden" id="imagen_url" name="imagen_url">
                     <div class="preview-box">
                         <span id="preview_text">Vista previa</span>
@@ -229,7 +241,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn">GUARDAR EJERCICIO</button>
+                <button type="submit" id="btn_submit" class="btn">GUARDAR EJERCICIO</button>
             </form>
         </div>
 
@@ -243,6 +255,7 @@
                             <th>Nombre</th>
                             <th>Repeticiones</th>
                             <th>Descanso</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -263,12 +276,16 @@
         fotoUpload.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
+                if (file.type !== 'image/png' && file.type !== 'image/jpeg') {
+                    alert("Solo se permiten imágenes JPG y PNG para asegurar compatibilidad con el PDF.");
+                    fotoUpload.value = '';
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const base64String = e.target.result;
-                    imagenUrlHidden.value = base64String; // Guardar texto Base64
+                    imagenUrlHidden.value = base64String;
                     
-                    // Mostrar preview
                     previewImg.src = base64String;
                     previewImg.style.display = 'block';
                     previewText.style.display = 'none';
@@ -280,6 +297,28 @@
                 previewText.style.display = 'inline';
             }
         });
+
+        function editarEjercicio(id, nombre, repeticion, duracion, imagenUrl) {
+            document.getElementById('form_action').value = 'editar';
+            document.getElementById('ejercicio_id').value = id;
+            document.getElementById('nombre').value = nombre;
+            document.getElementById('repeticion').value = repeticion;
+            document.getElementById('duracion').value = duracion;
+            
+            document.getElementById('btn_submit').innerText = 'ACTUALIZAR EJERCICIO';
+            
+            if(imagenUrl && imagenUrl.startsWith('data:image')) {
+                imagenUrlHidden.value = imagenUrl;
+                previewImg.src = imagenUrl;
+                previewImg.style.display = 'block';
+                previewText.style.display = 'none';
+            } else {
+                imagenUrlHidden.value = '';
+                previewImg.style.display = 'none';
+                previewText.style.display = 'inline';
+            }
+            window.scrollTo(0, 0);
+        }
     </script>
 </body>
 </html>

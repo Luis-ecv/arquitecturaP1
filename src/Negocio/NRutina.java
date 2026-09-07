@@ -37,4 +37,48 @@ public class NRutina {
     public List<Map<String, Object>> obtenerRutinas() {
         return dRutina.obtenerTodos();
     }
+
+    public String modificarRutina(String idStr, String nombre, String tipo, String clienteIdStr, String dietaIdStr) {
+        if (idStr == null || idStr.trim().isEmpty()) {
+            return "Error: ID no proporcionado.";
+        }
+        if (nombre == null || nombre.trim().isEmpty() || 
+            tipo == null || tipo.trim().isEmpty() ||
+            clienteIdStr == null || clienteIdStr.trim().isEmpty() ||
+            dietaIdStr == null || dietaIdStr.trim().isEmpty()) {
+            return "Error: Todos los campos son obligatorios para modificar.";
+        }
+
+        try {
+            int id = Integer.parseInt(idStr);
+            int clienteId = Integer.parseInt(clienteIdStr);
+            int dietaId = Integer.parseInt(dietaIdStr);
+
+            boolean exito = dRutina.editar(id, nombre, tipo, clienteId, dietaId);
+            if (exito) {
+                return "Éxito: Rutina modificada correctamente.";
+            } else {
+                return "Error: No se pudo modificar la rutina.";
+            }
+        } catch (NumberFormatException e) {
+            return "Error: ID de rutina, cliente o dieta deben ser numéricos.";
+        }
+    }
+
+    public String eliminarRutina(String idStr) {
+        if (idStr == null || idStr.trim().isEmpty()) {
+            return "Error: ID no proporcionado.";
+        }
+        try {
+            int id = Integer.parseInt(idStr);
+            boolean exito = dRutina.eliminar(id);
+            if (exito) {
+                return "Éxito: Rutina eliminada correctamente.";
+            } else {
+                return "Error: No se pudo eliminar la rutina. Es posible que tenga ejercicios asignados.";
+            }
+        } catch (NumberFormatException e) {
+            return "Error: ID inválido.";
+        }
+    }
 }

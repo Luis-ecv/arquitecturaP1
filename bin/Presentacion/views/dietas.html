@@ -132,7 +132,20 @@
 
         th { background-color: var(--light); color: var(--dark); }
 
-        tr:hover { background-color: #f1f2f6; }
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+
+        /* Estilos Kebab Menu */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 0 10px; font-weight: bold; color: var(--dark); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: var(--white); min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 10; border-radius: 6px; overflow: hidden; border: 1px solid var(--light); }
+        .dropdown-content button { color: var(--dark); padding: 12px 16px; text-decoration: none; display: block; background: none; border: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .dropdown-content button:hover { background-color: var(--light); }
+        .dropdown-content form { margin: 0; }
+        .dropdown-content .danger-text { color: var(--danger); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .action-cell { width: 50px; text-align: center; }
 
         .message {
             padding: 15px;
@@ -171,7 +184,8 @@
             <h2>Registrar Dieta</h2>
             <div class="message {{TIPO_MENSAJE}}">{{MENSAJE}}</div>
             <form action="/dietas" method="POST">
-                <input type="hidden" name="action" value="crear">
+                <input type="hidden" name="action" id="form_action" value="crear">
+                <input type="hidden" name="dieta_id" id="dieta_id" value="">
                 
                 <div class="form-group">
                     <label for="titulo">Título de la Dieta</label>
@@ -183,7 +197,7 @@
                     <textarea id="descripcion" name="descripcion" rows="5" required placeholder="Ej: Dieta basada en carbohidratos y proteínas..."></textarea>
                 </div>
 
-                <button type="submit" class="btn">GUARDAR DIETA</button>
+                <button type="submit" id="btn_submit" class="btn">GUARDAR DIETA</button>
             </form>
         </div>
 
@@ -193,8 +207,9 @@
                 <table>
                     <thead>
                         <tr>
-                            <th width="30%">Título</th>
-                            <th width="70%">Descripción</th>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -204,5 +219,17 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        function editarDieta(id, titulo, descripcion) {
+            document.getElementById('form_action').value = 'editar';
+            document.getElementById('dieta_id').value = id;
+            document.getElementById('titulo').value = titulo;
+            document.getElementById('descripcion').value = descripcion;
+            
+            document.getElementById('btn_submit').innerText = 'ACTUALIZAR DIETA';
+            window.scrollTo(0, 0);
+        }
+    </script>
 </body>
 </html>

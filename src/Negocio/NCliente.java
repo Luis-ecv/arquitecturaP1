@@ -44,4 +44,48 @@ public class NCliente {
     public List<Map<String, Object>> obtenerClientes() {
         return dCliente.obtenerTodos();
     }
+
+    public String modificarCliente(String idStr, String alturaStr, String correo, String nombre, String pesoStr, String sexo, String telefono) {
+        if (idStr == null || idStr.trim().isEmpty()) {
+            return "Error: ID no proporcionado.";
+        }
+        if (nombre == null || nombre.trim().isEmpty() ||
+            correo == null || correo.trim().isEmpty() ||
+            sexo == null || sexo.trim().isEmpty() ||
+            telefono == null || telefono.trim().isEmpty()) {
+            return "Error: Todos los campos de texto son obligatorios para modificar.";
+        }
+        
+        try {
+            int id = Integer.parseInt(idStr);
+            double altura = Double.parseDouble(alturaStr);
+            double peso = Double.parseDouble(pesoStr);
+            
+            boolean exito = dCliente.editar(id, altura, correo, nombre, peso, sexo, telefono);
+            if (exito) {
+                return "Éxito: Cliente modificado correctamente.";
+            } else {
+                return "Error: No se pudo modificar el cliente.";
+            }
+        } catch (NumberFormatException e) {
+            return "Error: Altura, peso o ID deben ser valores numéricos válidos.";
+        }
+    }
+
+    public String eliminarCliente(String idStr) {
+        if (idStr == null || idStr.trim().isEmpty()) {
+            return "Error: ID no proporcionado.";
+        }
+        try {
+            int id = Integer.parseInt(idStr);
+            boolean exito = dCliente.eliminar(id);
+            if (exito) {
+                return "Éxito: Cliente eliminado correctamente.";
+            } else {
+                return "Error: No se pudo eliminar el cliente. Es posible que tenga rutinas asignadas.";
+            }
+        } catch (NumberFormatException e) {
+            return "Error: ID inválido.";
+        }
+    }
 }

@@ -89,6 +89,22 @@ public class WebServer {
                         );
                         displayMensaje = "block";
                         tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("editar".equals(params.get("action"))) {
+                        mensajeResult = nCliente.modificarCliente(
+                                params.get("cliente_id"),
+                                params.get("altura"),
+                                params.get("correo"),
+                                params.get("nombre"),
+                                params.get("peso"),
+                                params.get("sexo"),
+                                params.get("telefono")
+                        );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("eliminar".equals(params.get("action"))) {
+                        mensajeResult = nCliente.eliminarCliente(params.get("cliente_id"));
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
                     }
                 }
                 enviarVista(exchange, mensajeResult, tipoMensaje, displayMensaje);
@@ -121,6 +137,24 @@ public class WebServer {
                              .append("<td>").append(c.get("altura")).append(" m</td>")
                              .append("<td>").append(c.get("sexo")).append("</td>")
                              .append("<td>").append(c.get("correo")).append("<br>").append(c.get("telefono")).append("</td>")
+                             .append("<td class='action-cell'>")
+                             .append("<div class='dropdown'>")
+                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<div class='dropdown-content'>")
+                             .append("<button type='button' onclick='editarCliente(")
+                             .append(c.get("id")).append(", \"")
+                             .append(c.get("nombre").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(c.get("peso")).append("\", \"")
+                             .append(c.get("altura")).append("\", \"")
+                             .append(c.get("sexo")).append("\", \"")
+                             .append(c.get("correo").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(c.get("telefono").toString().replace("\"", "\\\"")).append("\")'>Editar</button>")
+                             .append("<form action='/clientes' method='POST'>")
+                             .append("<input type='hidden' name='action' value='eliminar'>")
+                             .append("<input type='hidden' name='cliente_id' value='").append(c.get("id")).append("'>")
+                             .append("<button type='submit' class='danger-text'>Eliminar</button>")
+                             .append("</form>")
+                             .append("</div></div></td>")
                              .append("</tr>");
                 }
             }
@@ -159,6 +193,18 @@ public class WebServer {
                         );
                         displayMensaje = "block";
                         tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("editar".equals(params.get("action"))) {
+                        mensajeResult = nDieta.modificarDieta(
+                                params.get("dieta_id"),
+                                params.get("titulo"),
+                                params.get("descripcion")
+                        );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("eliminar".equals(params.get("action"))) {
+                        mensajeResult = nDieta.eliminarDieta(params.get("dieta_id"));
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
                     }
                 }
                 enviarVista(exchange, mensajeResult, tipoMensaje, displayMensaje);
@@ -188,6 +234,20 @@ public class WebServer {
                     tableBody.append("<tr>")
                              .append("<td><strong>").append(d.get("titulo")).append("</strong></td>")
                              .append("<td>").append(d.get("descripcion")).append("</td>")
+                             .append("<td class='action-cell'>")
+                             .append("<div class='dropdown'>")
+                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<div class='dropdown-content'>")
+                             .append("<button type='button' onclick='editarDieta(")
+                             .append(d.get("id")).append(", \"")
+                             .append(d.get("titulo").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(d.get("descripcion").toString().replace("\"", "\\\"")).append("\")'>Editar</button>")
+                             .append("<form action='/dietas' method='POST'>")
+                             .append("<input type='hidden' name='action' value='eliminar'>")
+                             .append("<input type='hidden' name='dieta_id' value='").append(d.get("id")).append("'>")
+                             .append("<button type='submit' class='danger-text'>Eliminar</button>")
+                             .append("</form>")
+                             .append("</div></div></td>")
                              .append("</tr>");
                 }
             }
@@ -228,6 +288,20 @@ public class WebServer {
                         );
                         displayMensaje = "block";
                         tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("editar".equals(params.get("action"))) {
+                        mensajeResult = nEjercicio.modificarEjercicio(
+                                params.get("ejercicio_id"),
+                                params.get("nombre"),
+                                params.get("duracion"),
+                                params.get("repeticion"),
+                                params.get("imagen_url")
+                        );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("eliminar".equals(params.get("action"))) {
+                        mensajeResult = nEjercicio.eliminarEjercicio(params.get("ejercicio_id"));
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
                     }
                 }
                 enviarVista(exchange, mensajeResult, tipoMensaje, displayMensaje);
@@ -252,7 +326,7 @@ public class WebServer {
             StringBuilder tableBody = new StringBuilder();
             
             if (ejercicios == null || ejercicios.isEmpty()) {
-                tableBody.append("<tr><td colspan='4' style='text-align:center;'>No hay ejercicios registrados.</td></tr>");
+                tableBody.append("<tr><td colspan='5' style='text-align:center;'>No hay ejercicios registrados.</td></tr>");
             } else {
                 for (Map<String, Object> e : ejercicios) {
                     String imgUrl = (String) e.get("imagen_url");
@@ -265,6 +339,22 @@ public class WebServer {
                              .append("<td><strong>").append(e.get("nombre")).append("</strong></td>")
                              .append("<td>").append(e.get("repeticion")).append("</td>")
                              .append("<td>").append(e.get("duracion")).append("</td>")
+                             .append("<td class='action-cell'>")
+                             .append("<div class='dropdown'>")
+                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<div class='dropdown-content'>")
+                             .append("<button type='button' onclick='editarEjercicio(")
+                             .append(e.get("id")).append(", \"")
+                             .append(e.get("nombre").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(e.get("repeticion").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(e.get("duracion").toString().replace("\"", "\\\"")).append("\", `")
+                             .append(imgUrl != null ? imgUrl : "").append("`)'>Editar</button>")
+                             .append("<form action='/ejercicios' method='POST'>")
+                             .append("<input type='hidden' name='action' value='eliminar'>")
+                             .append("<input type='hidden' name='ejercicio_id' value='").append(e.get("id")).append("'>")
+                             .append("<button type='submit' class='danger-text'>Eliminar</button>")
+                             .append("</form>")
+                             .append("</div></div></td>")
                              .append("</tr>");
                 }
             }
@@ -303,6 +393,20 @@ public class WebServer {
                                 params.get("cliente_id"),
                                 params.get("dieta_id")
                         );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("editar".equals(params.get("action"))) {
+                        mensajeResult = nRutina.modificarRutina(
+                                params.get("rutina_id"),
+                                params.get("nombre"),
+                                params.get("tipo"),
+                                params.get("cliente_id"),
+                                params.get("dieta_id")
+                        );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("eliminar".equals(params.get("action"))) {
+                        mensajeResult = nRutina.eliminarRutina(params.get("rutina_id"));
                         displayMensaje = "block";
                         tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
                     }
@@ -362,6 +466,22 @@ public class WebServer {
                              .append("<td>").append(r.get("nombre")).append("</td>")
                              .append("<td><span class='badge'>").append(r.get("tipo")).append("</span></td>")
                              .append("<td><span class='badge badge-dieta'>").append(r.get("dieta_titulo")).append("</span></td>")
+                             .append("<td class='action-cell'>")
+                             .append("<div class='dropdown'>")
+                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<div class='dropdown-content'>")
+                             .append("<button type='button' onclick='editarRutina(")
+                             .append(r.get("id")).append(", \"")
+                             .append(r.get("nombre").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(r.get("tipo").toString().replace("\"", "\\\"")).append("\", \"")
+                             .append(r.get("cliente_id")).append("\", \"")
+                             .append(r.get("dieta_id")).append("\")'>Editar</button>")
+                             .append("<form action='/rutinas' method='POST'>")
+                             .append("<input type='hidden' name='action' value='eliminar'>")
+                             .append("<input type='hidden' name='rutina_id' value='").append(r.get("id")).append("'>")
+                             .append("<button type='submit' class='danger-text'>Eliminar</button>")
+                             .append("</form>")
+                             .append("</div></div></td>")
                              .append("</tr>");
                 }
             }
@@ -477,13 +597,16 @@ public class WebServer {
                              .append("<td>").append(a.get("ejercicio_nombre")).append("</td>")
                              .append("<td>").append(a.get("repeticion")).append("</td>")
                              .append("<td>").append(a.get("duracion")).append("</td>")
-                             .append("<td>")
-                             .append("<form action='/asignaciones' method='POST' style='display:inline;'>")
+                             .append("<td class='action-cell'>")
+                             .append("<div class='dropdown'>")
+                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<div class='dropdown-content'>")
+                             .append("<form action='/asignaciones' method='POST'>")
                              .append("<input type='hidden' name='action' value='eliminar'>")
                              .append("<input type='hidden' name='asignacion_id' value='").append(a.get("id")).append("'>")
-                             .append("<button type='submit' class='btn-danger'>X</button>")
+                             .append("<button type='submit' class='danger-text'>Eliminar</button>")
                              .append("</form>")
-                             .append("</td>")
+                             .append("</div></div></td>")
                              .append("</tr>");
                 }
             }
@@ -528,8 +651,9 @@ public class WebServer {
                             rutinaId = Integer.parseInt(p.split("=")[1]);
                         }
                     }
+                    boolean isDownload = query.contains("download=true");
                     if (rutinaId != -1) {
-                        generarPDF(exchange, rutinaId);
+                        generarPDF(exchange, rutinaId, isDownload);
                         return;
                     }
                 }
@@ -566,6 +690,8 @@ public class WebServer {
                              .append("<td><div class='btn-group'>")
                              .append("<a href='/envios?action=pdf&rutina_id=").append(r.get("id"))
                              .append("' target='_blank' class='btn btn-pdf'>VER PDF</a>")
+                             .append("<a href='/envios?action=pdf&rutina_id=").append(r.get("id"))
+                             .append("&download=true' class='btn' style='background-color:#2d3436;'>DESCARGAR</a>")
                              .append("<button type='button' class='btn btn-wpp' onclick='sharePDF(")
                              .append(r.get("id")).append(", \"").append(r.get("cliente_nombre")).append("\")'>WPP</button>")
                              .append("<button type='button' class='btn btn-email' onclick='sharePDF(")
@@ -584,9 +710,12 @@ public class WebServer {
             os.close();
         }
 
-        private void generarPDF(HttpExchange exchange, int rutinaId) throws IOException {
+        private void generarPDF(HttpExchange exchange, int rutinaId, boolean isDownload) throws IOException {
             try {
                 exchange.getResponseHeaders().set("Content-Type", "application/pdf");
+                if (isDownload) {
+                    exchange.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"Rutina_" + rutinaId + ".pdf\"");
+                }
                 exchange.sendResponseHeaders(200, 0);
                 OutputStream os = exchange.getResponseBody();
 
@@ -626,7 +755,7 @@ public class WebServer {
                     String b64 = (String) a.get("imagen_url");
                     if (b64 != null && b64.startsWith("data:image")) {
                         try {
-                            String base64Image = b64.split(",")[1];
+                            String base64Image = b64.split(",")[1].replace(" ", "+");
                             byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Image);
                             com.itextpdf.text.Image img = com.itextpdf.text.Image.getInstance(imageBytes);
                             img.scaleToFit(50, 50);
@@ -635,6 +764,7 @@ public class WebServer {
                             imgCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
                             table.addCell(imgCell);
                         } catch(Exception ex) {
+                            System.out.println("Error procesando imagen: " + ex.getMessage());
                             table.addCell("Sin Img");
                         }
                     } else {
