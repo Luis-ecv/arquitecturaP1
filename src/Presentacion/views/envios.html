@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Training - Envíos de Rutinas</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --white: #ffffff;
+            --danger: #d63031;
+            --success: #00b894;
+            --wpp: #25D366;
+            --email: #EA4335;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: var(--dark);
+        }
+
+        /* Navbar CSS */
+        .navbar {
+            background-color: var(--dark);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .navbar a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            background-color: var(--primary);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--light);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn {
+            color: var(--white);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-pdf { background-color: var(--primary); }
+        .btn-wpp { background-color: var(--wpp); }
+        .btn-email { background-color: var(--email); }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/clientes">Clientes</a>
+        <a href="/dietas">Dietas</a>
+        <a href="/ejercicios">Ejercicios</a>
+        <a href="/rutinas">Rutinas</a>
+        <a href="/asignaciones">Asignaciones</a>
+        <a href="/envios" class="active">Enviar Rutina</a>
+    </nav>
+
+    <header>
+        <h1>Personal Training</h1>
+        <p>Exportación y Envío de Rutinas</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Lista de Rutinas listas para enviar</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Rutina</th>
+                            <th>Dieta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ENVIOS_TABLE_BODY}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sharePDF(rutinaId, nombreCliente) {
+            try {
+                // Descargar el PDF desde el servidor Java
+                const response = await fetch('/envios?action=pdf&rutina_id=' + rutinaId);
+                if (!response.ok) throw new Error("Error al generar el PDF");
+                
+                const blob = await response.blob();
+                const safeName = nombreCliente.replace(/\s+/g, '_');
+                const file = new File([blob], "Rutina_" + safeName + ".pdf", { type: 'application/pdf' });
+                
+                // Intentar usar el compartidor nativo (WhatsApp, Email, etc)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Tu Rutina de Entrenamiento',
+                        text: 'Hola ' + nombreCliente + ', adjunto tu plan de entrenamiento y dieta.'
+                    });
+                } else {
+                    // Si es una PC sin soporte de share, descargar el archivo
+                    alert("Tu navegador no soporta Web Share nativo. El PDF se descargará automáticamente para que lo envíes.");
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Rutina_" + safeName + ".pdf";
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Hubo un problema al procesar el envío: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

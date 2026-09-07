@@ -45,6 +45,7 @@ public class WebServer {
             server.createContext("/ejercicios", new EjercicioHandler());
             server.createContext("/rutinas", new RutinaHandler());
             server.createContext("/asignaciones", new AsignacionHandler());
+            server.createContext("/envios", new EnvioHandler());
             
             server.setExecutor(null);
             server.start();
@@ -393,10 +394,23 @@ public class WebServer {
                     Map<String, String> params = parseFormData(formData);
 
                     if ("crear".equals(params.get("action"))) {
+                        java.util.List<String> diasSeleccionados = new java.util.ArrayList<>();
+                        String[] todosLosDias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+                        for (String dia : todosLosDias) {
+                            if (params.containsKey("dia_" + dia)) {
+                                diasSeleccionados.add(dia);
+                            }
+                        }
+                        
                         mensajeResult = nRutinaEjercicio.registrarAsignacion(
+                                diasSeleccionados,
                                 params.get("rutina_id"),
                                 params.get("ejercicio_id")
                         );
+                        displayMensaje = "block";
+                        tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
+                    } else if ("eliminar".equals(params.get("action"))) {
+                        mensajeResult = nRutinaEjercicio.eliminarAsignacion(params.get("asignacion_id"));
                         displayMensaje = "block";
                         tipoMensaje = mensajeResult.startsWith("Éxito") ? "success" : "error";
                     }
@@ -458,10 +472,18 @@ public class WebServer {
 
                     tableBody.append("<tr>")
                              .append("<td><strong>").append(a.get("rutina_nombre")).append("</strong><br><small>").append(a.get("cliente_nombre")).append("</small></td>")
+                             .append("<td><span class='badge' style='background:#f39c12;'>").append(a.get("dia_rutina")).append("</span></td>")
                              .append("<td>").append(imgHtml).append("</td>")
                              .append("<td>").append(a.get("ejercicio_nombre")).append("</td>")
                              .append("<td>").append(a.get("repeticion")).append("</td>")
                              .append("<td>").append(a.get("duracion")).append("</td>")
+                             .append("<td>")
+                             .append("<form action='/asignaciones' method='POST' style='display:inline;'>")
+                             .append("<input type='hidden' name='action' value='eliminar'>")
+                             .append("<input type='hidden' name='asignacion_id' value='").append(a.get("id")).append("'>")
+                             .append("<button type='submit' class='btn-danger'>X</button>")
+                             .append("</form>")
+                             .append("</td>")
                              .append("</tr>");
                 }
             }
@@ -491,5 +513,145 @@ public class WebServer {
             }
         }
         return map;
+    }
+
+    class EnvioHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            try {
+                String query = exchange.getRequestURI().getQuery();
+                if (query != null && query.contains("action=pdf")) {
+                    String[] parts = query.split("&");
+                    int rutinaId = -1;
+                    for(String p : parts) {
+                        if(p.startsWith("rutina_id=")) {
+                            rutinaId = Integer.parseInt(p.split("=")[1]);
+                        }
+                    }
+                    if (rutinaId != -1) {
+                        generarPDF(exchange, rutinaId);
+                        return;
+                    }
+                }
+                
+                enviarVista(exchange);
+            } catch (Throwable t) {
+                t.printStackTrace();
+                throw new IOException(t);
+            }
+        }
+
+        private void enviarVista(HttpExchange exchange) throws IOException {
+            File file = new File("src/Presentacion/views/envios.html");
+            if (!file.exists()) {
+                String err = "Plantilla no encontrada.";
+                exchange.sendResponseHeaders(404, err.length());
+                exchange.getResponseBody().write(err.getBytes());
+                exchange.getResponseBody().close();
+                return;
+            }
+
+            String html = new String(Files.readAllBytes(file.toPath()), "UTF-8");
+            
+            List<Map<String, Object>> rutinas = nRutina.obtenerRutinas();
+            StringBuilder tableBody = new StringBuilder();
+            if (rutinas == null || rutinas.isEmpty()) {
+                tableBody.append("<tr><td colspan='4' style='text-align:center;'>No hay rutinas para enviar.</td></tr>");
+            } else {
+                for (Map<String, Object> r : rutinas) {
+                    tableBody.append("<tr>")
+                             .append("<td>").append(r.get("cliente_nombre")).append("</td>")
+                             .append("<td><strong>").append(r.get("nombre")).append("</strong></td>")
+                             .append("<td>").append(r.get("dieta_titulo")).append("</td>")
+                             .append("<td><div class='btn-group'>")
+                             .append("<a href='/envios?action=pdf&rutina_id=").append(r.get("id"))
+                             .append("' target='_blank' class='btn btn-pdf'>VER PDF</a>")
+                             .append("<button type='button' class='btn btn-wpp' onclick='sharePDF(")
+                             .append(r.get("id")).append(", \"").append(r.get("cliente_nombre")).append("\")'>WPP</button>")
+                             .append("<button type='button' class='btn btn-email' onclick='sharePDF(")
+                             .append(r.get("id")).append(", \"").append(r.get("cliente_nombre")).append("\")'>CORREO</button>")
+                             .append("</div></td>")
+                             .append("</tr>");
+                }
+            }
+
+            html = html.replace("{{ENVIOS_TABLE_BODY}}", tableBody.toString());
+
+            byte[] responseBytes = html.getBytes("UTF-8");
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseBytes);
+            os.close();
+        }
+
+        private void generarPDF(HttpExchange exchange, int rutinaId) throws IOException {
+            try {
+                exchange.getResponseHeaders().set("Content-Type", "application/pdf");
+                exchange.sendResponseHeaders(200, 0);
+                OutputStream os = exchange.getResponseBody();
+
+                com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+                com.itextpdf.text.pdf.PdfWriter.getInstance(document, os);
+                document.open();
+
+                List<Map<String, Object>> asignaciones = nRutinaEjercicio.obtenerAsignacionesPorRutina(rutinaId);
+                
+                String rutinaNombre = "Rutina";
+                String clienteNombre = "Cliente";
+                if (!asignaciones.isEmpty()) {
+                    rutinaNombre = (String) asignaciones.get(0).get("rutina_nombre");
+                    clienteNombre = (String) asignaciones.get(0).get("cliente_nombre");
+                }
+
+                com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font subtitleFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.NORMAL);
+                
+                document.add(new com.itextpdf.text.Paragraph("Plan de Entrenamiento: " + rutinaNombre, titleFont));
+                document.add(new com.itextpdf.text.Paragraph("Cliente: " + clienteNombre, subtitleFont));
+                document.add(new com.itextpdf.text.Paragraph(" "));
+
+                com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(5);
+                table.setWidthPercentage(100);
+                table.setWidths(new float[]{1.5f, 1.5f, 2f, 1.5f, 1.5f});
+                
+                table.addCell("Día");
+                table.addCell("Imagen");
+                table.addCell("Ejercicio");
+                table.addCell("Series/Reps");
+                table.addCell("Descanso");
+
+                for (Map<String, Object> a : asignaciones) {
+                    table.addCell((String) a.get("dia_rutina"));
+                    
+                    String b64 = (String) a.get("imagen_url");
+                    if (b64 != null && b64.startsWith("data:image")) {
+                        try {
+                            String base64Image = b64.split(",")[1];
+                            byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Image);
+                            com.itextpdf.text.Image img = com.itextpdf.text.Image.getInstance(imageBytes);
+                            img.scaleToFit(50, 50);
+                            com.itextpdf.text.pdf.PdfPCell imgCell = new com.itextpdf.text.pdf.PdfPCell(img);
+                            imgCell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                            imgCell.setVerticalAlignment(com.itextpdf.text.Element.ALIGN_MIDDLE);
+                            table.addCell(imgCell);
+                        } catch(Exception ex) {
+                            table.addCell("Sin Img");
+                        }
+                    } else {
+                        table.addCell("Sin Img");
+                    }
+
+                    table.addCell((String) a.get("ejercicio_nombre"));
+                    table.addCell((String) a.get("repeticion"));
+                    table.addCell((String) a.get("duracion"));
+                }
+
+                document.add(table);
+                document.close();
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
