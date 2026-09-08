@@ -4,7 +4,6 @@ import Database.Conexion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,12 +13,12 @@ public class DCliente {
 
     public boolean insertar(double altura, String correo, String nombre, double peso, String sexo, String telefono) {
         String sql = "INSERT INTO cliente(altura, correo, nombre, peso, sexo, telefono) VALUES(?,?,?,?,?,?)";
-        
+
         // Instanciamos Conexion como en el proyecto de referencia
         Conexion con = new Conexion();
-        
+
         try (Connection conn = con.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, altura);
             pstmt.setString(2, correo);
             pstmt.setString(3, nombre);
@@ -37,12 +36,12 @@ public class DCliente {
     public List<Map<String, Object>> obtenerTodos() {
         String sql = "SELECT * FROM cliente";
         List<Map<String, Object>> lista = new ArrayList<>();
-        
+
         Conexion con = new Conexion();
-        
+
         try (Connection conn = con.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, Object> fila = new HashMap<>();
@@ -61,11 +60,12 @@ public class DCliente {
         return lista;
     }
 
-    public boolean editar(int id, double altura, String correo, String nombre, double peso, String sexo, String telefono) {
+    public boolean editar(int id, double altura, String correo, String nombre, double peso, String sexo,
+            String telefono) {
         String sql = "UPDATE cliente SET altura = ?, correo = ?, nombre = ?, peso = ?, sexo = ?, telefono = ? WHERE id = ?";
         Conexion con = new Conexion();
         try (Connection conn = con.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, altura);
             pstmt.setString(2, correo);
             pstmt.setString(3, nombre);
@@ -85,7 +85,7 @@ public class DCliente {
         String sql = "DELETE FROM cliente WHERE id = ?";
         Conexion con = new Conexion();
         try (Connection conn = con.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
             return true;

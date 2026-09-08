@@ -10,9 +10,11 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.File;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -46,6 +48,7 @@ public class WebServer {
             server.createContext("/rutinas", new RutinaHandler());
             server.createContext("/asignaciones", new AsignacionHandler());
             server.createContext("/envios", new EnvioHandler());
+            server.createContext("/assets", new StaticHandler()); // Nuevo manejador estático
             
             server.setExecutor(null);
             server.start();
@@ -139,7 +142,7 @@ public class WebServer {
                              .append("<td>").append(c.get("correo")).append("<br>").append(c.get("telefono")).append("</td>")
                              .append("<td class='action-cell'>")
                              .append("<div class='dropdown'>")
-                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<button class='dropbtn' onclick='toggleDropdown(event)'>⋮</button>")
                              .append("<div class='dropdown-content'>")
                              .append("<button type='button' onclick='editarCliente(")
                              .append(c.get("id")).append(", \"")
@@ -236,7 +239,7 @@ public class WebServer {
                              .append("<td>").append(d.get("descripcion")).append("</td>")
                              .append("<td class='action-cell'>")
                              .append("<div class='dropdown'>")
-                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<button class='dropbtn' onclick='toggleDropdown(event)'>⋮</button>")
                              .append("<div class='dropdown-content'>")
                              .append("<button type='button' onclick='editarDieta(")
                              .append(d.get("id")).append(", \"")
@@ -341,7 +344,7 @@ public class WebServer {
                              .append("<td>").append(e.get("duracion")).append("</td>")
                              .append("<td class='action-cell'>")
                              .append("<div class='dropdown'>")
-                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<button class='dropbtn' onclick='toggleDropdown(event)'>⋮</button>")
                              .append("<div class='dropdown-content'>")
                              .append("<button type='button' onclick='editarEjercicio(")
                              .append(e.get("id")).append(", \"")
@@ -468,7 +471,7 @@ public class WebServer {
                              .append("<td><span class='badge badge-dieta'>").append(r.get("dieta_titulo")).append("</span></td>")
                              .append("<td class='action-cell'>")
                              .append("<div class='dropdown'>")
-                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<button class='dropbtn' onclick='toggleDropdown(event)'>⋮</button>")
                              .append("<div class='dropdown-content'>")
                              .append("<button type='button' onclick='editarRutina(")
                              .append(r.get("id")).append(", \"")
@@ -599,7 +602,7 @@ public class WebServer {
                              .append("<td>").append(a.get("duracion")).append("</td>")
                              .append("<td class='action-cell'>")
                              .append("<div class='dropdown'>")
-                             .append("<button class='dropbtn'>⋮</button>")
+                             .append("<button class='dropbtn' onclick='toggleDropdown(event)'>⋮</button>")
                              .append("<div class='dropdown-content'>")
                              .append("<form action='/asignaciones' method='POST'>")
                              .append("<input type='hidden' name='action' value='eliminar'>")
@@ -782,6 +785,45 @@ public class WebServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    class StaticHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String path = exchange.getRequestURI().getPath();
+            // path will be something like /assets/styles.css
+            // map it to src/Presentacion/assets/...
+            String filePath = "src/Presentacion" + path;
+            
+            File file = new File(filePath);
+            if (!file.exists() || file.isDirectory()) {
+                String err = "Archivo no encontrado: " + filePath;
+                exchange.sendResponseHeaders(404, err.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(err.getBytes());
+                os.close();
+                return;
+            }
+
+            // Determine content type
+            String contentType = "text/plain";
+            if (path.endsWith(".css")) {
+                contentType = "text/css";
+            } else if (path.endsWith(".js")) {
+                contentType = "application/javascript";
+            } else if (path.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            }
+
+            exchange.getResponseHeaders().set("Content-Type", contentType);
+            byte[] fileBytes = Files.readAllBytes(file.toPath());
+            exchange.sendResponseHeaders(200, fileBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(fileBytes);
+            os.close();
         }
     }
 }
