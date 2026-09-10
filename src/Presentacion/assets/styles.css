@@ -246,6 +246,15 @@ tr:hover {
     background-color: #b32424;
 }
 
+.btn-group {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-pdf { background-color: var(--primary); }
+.btn-wpp { background-color: #25D366; }
+.btn-email { background-color: #EA4335; }
+
 /* REGLAS RESPONSIVAS PARA TABLETS Y ESCRITORIO */
 @media (min-width: 768px) {
     .container {

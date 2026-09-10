@@ -30,8 +30,8 @@ public class DRutina {
     }
 
     public List<Map<String, Object>> obtenerTodos() {
-        // Hacemos JOIN para traer los nombres del cliente y la dieta
-        String sql = "SELECT r.id, r.nombre, r.tipo, c.nombre AS cliente_nombre, d.titulo AS dieta_titulo " +
+        // Hacemos JOIN para traer los nombres del cliente y la dieta, además de teléfono y correo para envíos
+        String sql = "SELECT r.id, r.nombre, r.tipo, c.nombre AS cliente_nombre, c.telefono, c.correo, d.titulo AS dieta_titulo " +
                      "FROM rutina r " +
                      "JOIN cliente c ON r.cliente_id = c.id " +
                      "JOIN dieta d ON r.dieta_id = d.id " +
@@ -50,6 +50,8 @@ public class DRutina {
                 fila.put("nombre", rs.getString("nombre"));
                 fila.put("tipo", rs.getString("tipo"));
                 fila.put("cliente_nombre", rs.getString("cliente_nombre"));
+                fila.put("telefono", rs.getString("telefono"));
+                fila.put("correo", rs.getString("correo"));
                 fila.put("dieta_titulo", rs.getString("dieta_titulo"));
                 lista.add(fila);
             }
